@@ -1,19 +1,19 @@
 package me.lightspeed7.simplified
 
-import java.sql.{Connection, DriverManager, ResultSet}
+import java.sql.{ Connection, DriverManager, ResultSet }
 
 object Database {
 
   Class.forName("com.mysql.jdbc.Driver")
 
   /**
-    * Connect to a MySQL database
-    *
-    * @param url - use jdbc:mysql://host:3306/database format here
-    * @param user
-    * @param password
-    * @return Connected object wrapping a connection
-    */
+   * Connect to a MySQL database
+   *
+   * @param url - use jdbc:mysql://host:3306/database format here
+   * @param user
+   * @param password
+   * @return Connected object wrapping a connection
+   */
   def connect(url: String, user: String, password: String): Connected = {
     val database = url.substring(url.lastIndexOf("/") + 1)
     val conn = DriverManager.getConnection(url, user, password)
@@ -21,21 +21,21 @@ object Database {
   }
 
   /**
-    * Use for testing ONLY !!!!
-    *
-    * @param rootPassword
-    * @param databaseName
-    */
+   * Use for testing ONLY !!!!
+   *
+   * @param rootPassword
+   * @param databaseName
+   */
   def dropCreateLocalDatabase(rootPassword: String, databaseName: String): Unit = {
     for (conn <- AutoCloseable(connect("jdbc:mysql://localhost:3306/mysql", "root", rootPassword))) {
       conn.execute(s"DROP DATABASE IF EXISTS `$databaseName`")
       conn.execute(s"CREATE DATABASE IF NOT EXISTS `$databaseName`")
     }
+    ()
   }
 }
 
-
-class Connected private(connection: Connection, dbName: String, validTimeout: Int = 5000) extends java.lang.AutoCloseable {
+class Connected(connection: Connection, dbName: String, validTimeout: Int = 5000) extends java.lang.AutoCloseable {
 
   import java.sql.ResultSet._
 

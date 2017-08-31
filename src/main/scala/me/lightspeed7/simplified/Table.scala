@@ -48,9 +48,9 @@ object Table {
   def makeTable(database: String, table: String, columns: Seq[Column], keys: Seq[Key]): String = {
     s"""
        |CREATE TABLE `$database`.`$table` (
-       |${columns.map(_.toLine).mkString(",${System.lineSeparator()}")}
+       |${columns.map(_.toLine).mkString(s",${System.lineSeparator()}")}
        |-- keys
-       |${keys.map(_.toLine).mkString(",${System.lineSeparator()}")}
+       |${keys.map(_.toLine).mkString(s",${System.lineSeparator()}")}
        |)
        """.stripMargin
   }
