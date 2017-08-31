@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  mysql: 
+    image: mysql:5.7
+    depends_on:
+      - registrator
+    labels:
+      SERVICE_NAME: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - "3306:3306"
+  consul:
+    image: gliderlabs/consul-server:latest
+    command: -node consul -bootstrap -client 0.0.0.0 -advertise 127.0.0.1
+    ports:
+      - "8500:8500"
+      - "8400:8400"
+      - "53:8600/udp"
+    labels:
+      SERVICE_NAME: "consul"
+      SERVICE_8400_IGNORE: "true"
+      SERVICE_8500_IGNORE: "true"
+      SERVICE_8600_IGNORE: "true"
+  registrator:
+    depends_on:
+      - consul
+    image: gliderlabs/registrator:latest
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    command: -ip 127.0.0.1 consul://consul:8500
+  start_dependencies:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - consul
+      - mysql
+      - registrator
+    command: consul:8500 mysql:3306

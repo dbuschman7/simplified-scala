@@ -5,41 +5,44 @@ import scalariform.formatter.preferences._
 scalaVersion := "2.12.3"
 name := "simplified-scala"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.4.16"
-libraryDependencies +=  "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.4"
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.43"
+libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
 
-initialize := { 
-  val _ = initialize.value 
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"
+
+initialize := {
+  val _ = initialize.value
   val ver = sys.props("java.specification.version")
-  if ( ver != "1.8") 
-    sys.error(s"Java 1.8 is required, found $ver") 
+  if (ver != "1.8")
+    sys.error(s"Java 1.8 is required, found $ver")
 }
 
 scalacOptions ++= Seq(
-  "-deprecation",  //
+  "-deprecation", //
   "-encoding", "UTF-8", //
-  "-feature", 
-  "-language:postfixOps", 
-  "-language:implicitConversions", 
-  "-unchecked", 
-  "-Xfatal-warnings", 
-  "-Xlint", 
-  "-Yno-adapted-args", 
-  "-Ywarn-dead-code", 
+  "-feature",
+  "-language:postfixOps",
+  "-language:implicitConversions",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard", 
-  "-Xfuture", 
+  "-Ywarn-value-discard",
+  "-Xfuture",
   "-Ywarn-unused-import"
 )
-javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint") 
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oOF")
-maxErrors := 20 
+maxErrors := 20
 
 ScalariformKeys.preferences := ScalariformKeys.preferences.value
-    .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(DoubleIndentClassDeclaration, true)
-    .setPreference(IndentWithTabs, false)
-    .setPreference(DanglingCloseParenthesis, Preserve)
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentClassDeclaration, true)
+  .setPreference(IndentWithTabs, false)
+  .setPreference(DanglingCloseParenthesis, Preserve)
 
 
 
