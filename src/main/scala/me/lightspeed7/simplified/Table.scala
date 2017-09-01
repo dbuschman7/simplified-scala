@@ -53,6 +53,7 @@ object Table {
        |${keys.map(_.toLine).mkString(s",${System.lineSeparator()}")}
        |)
        """.stripMargin
+
   }
 
 }
