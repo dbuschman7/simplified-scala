@@ -9,15 +9,6 @@ object Files {
 
   def mkdirs(in: Path): Boolean = in.getParent.toFile.mkdirs
 
-  //  def findAllFiles(selector: File => Boolean)(baseDir: File): Seq[File] = {
-  //    if (baseDir.isDirectory) {
-  //      val local = baseDir.listFiles
-  //      local.filter(!_.isDirectory).filter(selector(_)) ++ local.filter(_.isDirectory).flatMap(findAllFiles(selector))
-  //    } else {
-  //      Seq(baseDir)
-  //    }
-  //  }
-
   def findAllFiles(selector: File => Boolean)(location: File): Seq[File] = {
 
     @annotation.tailrec
