@@ -12,12 +12,13 @@ object Files {
   def findAllFiles(selector: File => Boolean)(location: File): Seq[File] = {
 
     @annotation.tailrec
-    def go(toCheck: List[File], results: List[File]): Seq[File] = toCheck match {
+    def go(toCheck: List[File], previous: List[File]): Seq[File] = toCheck match {
       case head :: tail =>
-        val filesList: Seq[File] = head.listFiles.toSeq
-        val updated: List[File] = results ++ filesList.filterNot(_.isDirectory).filter(selector(_))
-        go(tail ++ filesList.filter(_.isDirectory), updated)
-      case _ => results
+        val filesList = head.listFiles
+        val newFiles = filesList.filterNot(_.isDirectory).filter(selector(_))
+        val newDirs = filesList.filter(_.isDirectory)
+        go(tail ++ newDirs, previous ++ newFiles) // recurse
+      case _ => previous
     }
 
     go(location :: Nil, Nil)
