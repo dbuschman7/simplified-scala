@@ -34,7 +34,7 @@ object Table {
 
   case class Key(name: String, columns: Seq[String]) {
     def toLine: String = {
-      val cols = columns.toSeq.map { c => s"`${c}`" }
+      val cols = columns.map { c => s"`$c`" }
       s"KEY `$name` (${cols.mkString(",")}) "
     }
   }
@@ -46,14 +46,9 @@ object Table {
   def key(name: String, columns: String*): Key = Key(name, columns.toSeq)
 
   def makeTable(database: String, table: String, columns: Seq[Column], keys: Seq[Key]): String = {
-    s"""
-       |CREATE TABLE `$database`.`$table` (
-       |${columns.map(_.toLine).mkString(s",${System.lineSeparator()}")}
-       |-- keys
-       |${keys.map(_.toLine).mkString(s",${System.lineSeparator()}")}
-       |)
-       """.stripMargin
-
+    val sep = System.lineSeparator()
+    val cols = (columns.map(_.toLine) ++ keys.map(_.toLine)).mkString(sep, s",$sep", sep)
+    s"CREATE TABLE `$database`.`$table` ($cols)"
   }
 
 }

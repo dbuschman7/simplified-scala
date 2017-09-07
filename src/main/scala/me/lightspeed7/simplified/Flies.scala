@@ -1,22 +1,35 @@
 package me.lightspeed7.simplified
 
-import java.io.{ BufferedWriter, File, FileWriter, Writer }
-import java.nio.file.{ Path, Paths }
+import java.io.{BufferedWriter, File, FileWriter, Writer}
+import java.nio.file.{Path, Paths}
+import java.util.concurrent.atomic.AtomicLong
 
 object Files {
-  val cwd = Paths.get("").toAbsolutePath
+  val cwd: Path = Paths.get("").toAbsolutePath
 
   def mkdirs(in: Path): Boolean = in.getParent.toFile.mkdirs
 
-  def findAllFiles(selector: File => Boolean)(baseDir: File): Seq[File] = {
-    if (baseDir.isDirectory) {
-      val local = baseDir.listFiles
-      val currentDirFiles = local.filter(!_.isDirectory).filter(selector(_))
-      val recursedFiles = local.filter(_.isDirectory).flatMap(findAllFiles(selector))
-      currentDirFiles ++ recursedFiles
-    } else {
-      Seq(baseDir)
+  //  def findAllFiles(selector: File => Boolean)(baseDir: File): Seq[File] = {
+  //    if (baseDir.isDirectory) {
+  //      val local = baseDir.listFiles
+  //      local.filter(!_.isDirectory).filter(selector(_)) ++ local.filter(_.isDirectory).flatMap(findAllFiles(selector))
+  //    } else {
+  //      Seq(baseDir)
+  //    }
+  //  }
+
+  def findAllFiles(selector: File => Boolean)(location: File): Seq[File] = {
+
+    @annotation.tailrec
+    def go(toCheck: List[File], results: List[File]): Seq[File] = toCheck match {
+      case head :: tail =>
+        val filesList: Seq[File] = head.listFiles.toSeq
+        val updated: List[File] = results ++ filesList.filterNot(_.isDirectory).filter(selector(_))
+        go(tail ++ filesList.filter(_.isDirectory), updated)
+      case _ => results
     }
+
+    go(location :: Nil, Nil)
   }
 }
 
@@ -41,14 +54,14 @@ class DelimitedFile(path: Path, mkDirs: Boolean = false, delimiter: String = Sys
     }
   }
 
-  override def close() = underlying.close()
+  override def close(): Unit = underlying.close()
 }
 
 trait DelimitedSerializable {
   def toDelimitedString: String
 }
 
-class FileSaver[T <: DelimitedSerializable](path: Path) {
+class FileSaver[T <: DelimitedSerializable](path: Path, delimter: String = System.lineSeparator()) {
 
   def persist(in: Seq[T]): Unit = {
     for (writer <- AutoCloseable(new DelimitedFile(path))) {
@@ -57,10 +70,17 @@ class FileSaver[T <: DelimitedSerializable](path: Path) {
   }
 }
 
-class StreamSaver[T <: DelimitedSerializable](path: Path) extends java.lang.AutoCloseable {
+class StreamSaver[T <: DelimitedSerializable](path: Path, delimter: String = System.lineSeparator()) extends java.lang.AutoCloseable {
   private val writer = new DelimitedFile(path)
+  private val counter = new AtomicLong(0L)
 
-  def push(in: T): Unit = writer.write(in.toDelimitedString)
+  def push(in: T): Unit = {
+    writer.write(in.toDelimitedString)
+    counter.incrementAndGet
+    ()
+  }
 
-  override def close() = writer.close()
+  def count: Long = counter.get
+
+  override def close(): Unit = writer.close()
 }

@@ -10,7 +10,6 @@ class AutoCloseable[A <: java.lang.AutoCloseable](protected val c: A) {
   }
 
   def foreach[B](f: (A) => B): B = map(f)
-
 }
 
 object AutoCloseable {

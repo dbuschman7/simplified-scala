@@ -1,31 +1,35 @@
 package me.lightspeed7.simplified
 
-import java.sql.{ Connection, DriverManager, ResultSet }
+import java.sql.{Connection, DriverManager, ResultSet}
 
 object Database {
 
   Class.forName("com.mysql.jdbc.Driver")
 
   /**
-   * Connect to a MySQL database
-   *
-   * @param url - use jdbc:mysql://host:3306/database format here
-   * @param user
-   * @param password
-   * @return Connected object wrapping a connection
-   */
+    * Connect to a MySQL database
+    *
+    * @param url      - use jdbc:mysql://host:3306/database format here
+    * @param user     :String
+    * @param password :String
+    * @return Connected object wrapping a connection
+    */
   def connect(url: String, user: String, password: String): Connected = {
     val database = url.substring(url.lastIndexOf("/") + 1)
     val conn = DriverManager.getConnection(url, user, password)
     new Connected(conn, database)
   }
 
+  def connectLocal(rootPassword: String, databaseName: String) = {
+    connect("jdbc:mysql://localhost:3306/" + databaseName, "root", rootPassword)
+  }
+
   /**
-   * Use for testing ONLY !!!!
-   *
-   * @param rootPassword
-   * @param databaseName
-   */
+    * Use for testing ONLY !!!!
+    *
+    * @param rootPassword :String
+    * @param databaseName :String
+    */
   def dropCreateLocalDatabase(rootPassword: String, databaseName: String): Unit = {
     for (conn <- AutoCloseable(connect("jdbc:mysql://localhost:3306/mysql", "root", rootPassword))) {
       conn.execute(s"DROP DATABASE IF EXISTS `$databaseName`")
@@ -43,7 +47,7 @@ class Connected(connection: Connection, dbName: String, validTimeout: Int = 5000
 
   def isValid: Boolean = connection.isValid(validTimeout)
 
-  def query[T](query: String, convert: ResultSet => T): List[T] = {
+  def query[T](query: => String)(convert: ResultSet => T): List[T] = {
     for (stmt <- AutoCloseable(connection.createStatement())) {
       for (rs <- AutoCloseable(stmt.executeQuery(query))) {
         new Iterator[T] {
@@ -55,7 +59,7 @@ class Connected(connection: Connection, dbName: String, validTimeout: Int = 5000
     }
   }
 
-  def stream(query: String, process: ResultSet => Unit): Unit = {
+  def stream(process: ResultSet => Unit)(query: => String): Unit = {
     for (stmt <- AutoCloseable(connection.createStatement(TYPE_FORWARD_ONLY, CONCUR_READ_ONLY))) {
       stmt.setFetchSize(Integer.MIN_VALUE)
       for (rs <- AutoCloseable(stmt.executeQuery(query))) {
@@ -66,11 +70,11 @@ class Connected(connection: Connection, dbName: String, validTimeout: Int = 5000
     }
   }
 
-  def execute(sql: String): Int = {
+  def execute(sql: => String): Int = {
     for (stmt <- AutoCloseable(connection.createStatement())) {
       stmt.executeUpdate(sql)
     }
   }
 
-  override def close() = connection.close()
+  override def close(): Unit = connection.close()
 }
