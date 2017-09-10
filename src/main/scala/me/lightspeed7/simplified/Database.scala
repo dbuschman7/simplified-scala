@@ -1,6 +1,6 @@
 package me.lightspeed7.simplified
 
-import java.sql.{Connection, DriverManager}
+import java.sql.{Connection, DriverManager, ResultSet}
 
 object Database {
 
@@ -12,7 +12,7 @@ object Database {
     new Connected(conn, database)
   }
 
-  def connectLocal(rootPassword: String, databaseName: String) = {
+  def connectLocal(rootPassword: String, databaseName: String): Connected = {
     connect("jdbc:mysql://localhost:3306/" + databaseName, "root", rootPassword)
   }
 
@@ -37,6 +37,30 @@ class Connected(connection: Connection, dbName: String, validTimeout: Int = 5000
   def execute(sql: => String): Int = {
     for (stmt <- AutoCloseable(connection.createStatement())) {
       stmt.executeUpdate(sql)
+    }
+  }
+
+  def query[T](query: => String)(convert: ResultSet => T): List[T] = {
+    for (stmt <- AutoCloseable(connection.createStatement())) {
+      for (rs <- AutoCloseable(stmt.executeQuery(query))) {
+        new Iterator[T] {
+          def hasNext: Boolean = rs.next()
+
+          def next(): T = convert(rs)
+        }.toList
+      }
+    }
+  }
+
+  def stream(process: ResultSet => Unit)(query: => String): Unit = {
+    import java.sql.ResultSet._
+    for (stmt <- AutoCloseable(connection.createStatement(TYPE_FORWARD_ONLY, CONCUR_READ_ONLY))) {
+      stmt.setFetchSize(Integer.MIN_VALUE)
+      for (rs <- AutoCloseable(stmt.executeQuery(query))) {
+        while (rs.next()) {
+          process(rs)
+        }
+      }
     }
   }
 

@@ -27,3 +27,8 @@
 * Connect to a database( MySQL )
 * Create a table to write data into
 
+## Step 4 
+
+* Write data into the database with batching
+* Read a sonnet back out of the database in domain objects
+* Look at de-serialization simplicity and performance 
