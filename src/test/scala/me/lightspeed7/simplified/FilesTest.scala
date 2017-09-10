@@ -1,8 +1,8 @@
 package me.lightspeed7.simplified
 
-import java.io.{ BufferedWriter, FileWriter }
 import java.nio.file.Paths
 
+import me.lightspeed7.simplified.Files.{ DelimitedSerializable, FileSaver, StreamSaver }
 import org.scalatest.{ FunSuite, Matchers }
 
 class FilesTest extends FunSuite with Matchers {
@@ -11,32 +11,32 @@ class FilesTest extends FunSuite with Matchers {
 
     import DataHelper._
 
-    case class Line(line: String, number: Int) {
+    case class Line(line: String, number: Int) extends DelimitedSerializable {
       def toDelimitedString: String = s"$number|$line"
     }
 
     val lines = getFileData("shakespeare.txt")
-      .zipWithIndex
+      .zipWithIndex // zero based
       .map {
-        case (l, i) => Line(l, i)
+        case (l, i) => Line(l, i + 1)
       }
 
     lines.foreach { l =>
       println(s"${l.number}|${l.line}")
     }
 
-    // write a file out manually
-    val outputFilePath = Paths.get(Files.cwd.toString, "target/shakespeare.delimited")
-    Files.mkdirs(outputFilePath)
+    // write a file out all at once
+    Time.it(s"Wrote ${lines.length} lines to file") {
+      new FileSaver[Line](Paths.get(Files.cwd.toString, "target/shakespeare.delimited.at.once")).persist(lines)
+    }
 
-    val buf = new BufferedWriter(new FileWriter(outputFilePath.toFile))
-    try {
-      lines.foreach { line =>
-        buf.write(line.toDelimitedString)
-        buf.write(System.lineSeparator())
+    // stream the file out in delimited form
+    for (stream <- AutoCloseable(new StreamSaver[Line](Paths.get(Files.cwd.toString, "target/shakespeare.delimited.streamed")))) {
+      var count = 0L
+      Time.it(s"Streamed $count lines to file") {
+        lines.foreach(stream.push)
+        count = stream.count
       }
-    } finally {
-      buf.close()
     }
   }
 }
