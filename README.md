@@ -11,3 +11,9 @@
     * There is a Shakespeare.txt file with all of his works
 * Read the data file in 
     * Read and label all of the lines with line numbers attached
+
+## Step 2 
+
+* Write data to a file the hard way
+
+
