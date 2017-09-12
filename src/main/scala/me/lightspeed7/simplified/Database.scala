@@ -21,7 +21,9 @@ object Database {
     */
   def dropCreateLocalDatabase(rootPassword: String, databaseName: String): Unit = {
     for (conn <- AutoCloseable(connectLocal(rootPassword, "mysql"))) {
+      println(s"Dropping database - $databaseName")
       conn.execute(s"DROP DATABASE IF EXISTS `$databaseName`")
+      println(s"Creating database - $databaseName")
       conn.execute(s"CREATE DATABASE IF NOT EXISTS `$databaseName`")
     }
     ()
