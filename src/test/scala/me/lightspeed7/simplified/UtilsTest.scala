@@ -17,12 +17,12 @@ class UtilsTest extends FunSuite with Matchers {
   }
 
   test("Time it ") {
-    var result: String = null
-    Time.it("Time me", (in) => result = in) {
+    var output: String = null
+    Time.it("Time me", (in) => output = in) {
       Thread.sleep(500)
     }
-    println(result)
-    result.contains("Elapsed") should be(true)
+    println(output)
+    output.contains("Elapsed") should be(true)
   }
 
   test("File sizing") {

@@ -1,7 +1,5 @@
 package me.lightspeed7.simplified
 
-import java.nio.file.Paths
-
 import scala.io.Source
 
 object DataHelper {
@@ -13,7 +11,7 @@ object DataHelper {
 
     // find the file in our source tree
     val testFile = Files
-      .findAllFiles(in => in.getName == fileName)(Paths.get(".").toFile)
+      .findAllFiles(in => in.getName == fileName)(Files.cwd.toFile)
       .filterNot(_.getCanonicalPath.contains("target"))
       .headOption
 

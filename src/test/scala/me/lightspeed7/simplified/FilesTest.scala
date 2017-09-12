@@ -13,7 +13,7 @@ class FilesTest extends FunSuite with Matchers {
     val lines = getFileData("shakespeare.txt")
       .zipWithIndex
       .map {
-        case (l, i) => Line(l, i)
+        case (l, i) => Line(l, i + 1)
       }
 
     lines.foreach { l =>
