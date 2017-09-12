@@ -1,7 +1,7 @@
 package me.lightspeed7.simplified
 
-import java.io.{ BufferedWriter, File, FileWriter, Writer }
-import java.nio.file.{ Path, Paths }
+import java.io.{BufferedWriter, File, FileWriter, Writer}
+import java.nio.file.{Path, Paths}
 import java.util.concurrent.atomic.AtomicLong
 
 object Files {
@@ -57,7 +57,7 @@ object Files {
 
     def persist(in: Seq[T]): Unit = {
       for (writer <- AutoCloseable(new DelimitedFile(path))) {
-        in.map(_.toDelimitedString).foreach(writer.write)
+        in.foreach { l => writer.write(l.toDelimitedString) }
       }
     }
   }
@@ -76,4 +76,5 @@ object Files {
 
     override def close(): Unit = writer.close()
   }
+
 }
