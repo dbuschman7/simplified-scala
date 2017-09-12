@@ -1,13 +1,13 @@
 package me.lightspeed7.simplified
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.{FunSuite, Matchers}
 
 class UtilsTest extends FunSuite with Matchers {
 
   test("Cool Strings") {
     import CoolStrings._
 
-    "foo".notBlank should be(Some("foo"))
+    "foo".notEmpty should be(Some("foo"))
 
     val foo: String = null
     foo.notBlank should be(None)

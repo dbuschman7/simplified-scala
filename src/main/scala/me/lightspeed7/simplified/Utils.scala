@@ -10,7 +10,7 @@ object CoolStrings {
 
     def notEmpty: Option[String] = in.notNull match {
       case "" => None
-      case _  => Option(in)
+      case _ => Option(in)
     }
   }
 
@@ -45,7 +45,7 @@ object PrettyPrint {
 
   def fileSizing(input: Long): String = {
     if (input <= 0) return "0.0"
-    val digitGroups = (Math.log10(input.toDouble) / Math.log10(1024)).toInt
+    val digitGroups = (Math.log10(input.toDouble) / Math.log10(1024)).floor.toInt
     format.format(input / Math.pow(1024.0, digitGroups.toDouble)) + " " + units(digitGroups)
   }
 
