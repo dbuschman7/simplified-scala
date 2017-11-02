@@ -49,4 +49,6 @@ object PrettyPrint {
     format.format(input / Math.pow(1024.0, digitGroups.toDouble)) + " " + units(digitGroups)
   }
 
+  def number(input: Long): String = format.format(input)
+
 }
